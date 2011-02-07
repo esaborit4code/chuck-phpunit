@@ -8,7 +8,7 @@ class TestExample extends PHPUnit_Framework_TestCase
 	
 	public function testExample2()
 	{
-		sleep(100);
+		sleep(2);
 		$this->assertTrue(true);
 	}
 }
