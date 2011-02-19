@@ -5,24 +5,26 @@ ini_set("error_reporting", E_ALL);
 require_once 'PHPUnit/Framework.php';
 require_once dirname(__FILE__).'/framework/TestRunner.php';
 
+define("TESTING_MODE", true);
+
+
 $testRunner = new TestRunner();
 
-$checked = $_POST;
+$resultsHTML = "";
 
-$suites = $testRunner->getSuites($checked);
-$results = "";
+$checkedTestFolders = $_POST;
 
-$thereAreTestsToRun = (!empty($checked));
+$thereAreTestsToRun = (!empty($checkedTestFolders));
 if($thereAreTestsToRun)
 {
-	foreach($checked as $key => $value)
-	{
-	    require_once("./".$key."/suite.php");
-	}
+	$folderNames = array_keys($checkedTestFolders);
+	$testRunner->addTestFolders($folderNames);
 	
-	$results = $testRunner->run();
+	$resultsHTML = $testRunner->run();
 }
 
-require_once dirname(__FILE__).'/view/template.php';
 
+$suitesListHTML = $testRunner->getSuitesListHTML($checkedTestFolders);
+
+require_once dirname(__FILE__).'/view/template.php';
 ?>

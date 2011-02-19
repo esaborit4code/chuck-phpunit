@@ -4,137 +4,191 @@ require_once("PHPUnit/Util/Log/JUnit.php");
 class TestRunner
 {
 	const TESTS_FOLDER = "tests";
+	
 	public $testSuites = array();
-	public $assertions = 0;
-	public $failed = 0;
+	
+	public $assertions	= 0;
+	public $failed		= 0;
 
 	public function run()
 	{
-		$xml_result = $this->getXML();
-		$simple = new SimpleXMLElement($xml_result);
+		$resultXML = $this->getResultXML();
 
-		$xhtml = "";
+		$testSuitesHTML = "";
 
-		foreach($simple->{'testsuite'}->testsuite as $testSuite)
+		foreach($resultXML->{'testsuite'}->testsuite as $testSuite)
 		{
-			$xhtml .= "<h1>".(string)$testSuite['name']."</h1>";
-			$xhtml .= $this->renderTestSuite($testSuite);
+			$testSuitesHTML .= $this->getTestSuiteHTML($testSuite);
 		}
-		$class = "win";
-		if($this->failed > 0)
-		{
-			$class = "epicfail";
-		}
-		$xhtml = "Total assertions: " . $this->assertions . "<br /> Total failed: ".$this->failed."<br /><div id='animatedgif' class='".$class."'></div>". $xhtml;
+		
+		$resultHTML = $this->getResultHTML($testSuitesHTML);
 
-		return $xhtml;
+		return $resultHTML;
 	}
-
-	public function getXML()
+	
+	private function getResultXML()
 	{
-		$suite = new PHPUnit_Framework_TestSuite();
-		$suite->setName('TestRunner');
+		$testRunner = new PHPUnit_Framework_TestSuite();
+		$testRunner->setName('TestRunner');
 
-		foreach($this->testSuites as $oneTest)
+		foreach($this->testSuites as $testSuite)
 		{
-			$suite->addTestSuite($oneTest);
+			$testRunner->addTestSuite($testSuite);
 		}
 
 		$listener = new PHPUnit_Util_Log_JUnit;
+		
 		$testResult = new PHPUnit_Framework_TestResult();
 		$testResult->addListener($listener);
-		$result = $suite->run($testResult);
-		$xml_result = $listener->getXML();
-		return $xml_result;
+		
+		$testRunner->run($testResult);
+		
+		$resultXMLString = $listener->getXML();
+		
+		$resultXML = simplexml_load_string($resultXMLString);
+		
+		return $resultXML;
 	}
-
-	public function renderTestSuite($testSuite)
+	
+	private function getResultHTML($testSuitesHTML)
 	{
-		 
-		$xhtml = "";
-		foreach($testSuite->testcase as $testcase)
-		{
-			$result = array();
-			// Don't froget to cast SimpleXMLElement to string!
-			$result['name'] = (string)$testcase['name'];
-			$xhtml .= "<div class='name'>".$result['name']. " (" .(string)$testcase['assertions'] . " assertions - ".(string)$testcase['time']."s)";
-			$this->assertions += (string)$testcase['assertions'];
-
-			if(isset($testcase->{'failure'}))
-			{
-				$this->failed = $this->failed + 1;
-				$result['result'] = 'Fail';
-				$xhtml .= "<a class='failAnchor' name='fail$this->failed'><div class='fail'>".$result['result']."</div>";
-				$result['message'] = (string)$testcase->{'failure'};
-				$xhtml .= "<div class='errorMessage'>".nl2br(htmlentities($result['message']))."</div></a>";
-			}
-			elseif(isset($testcase->{'error'}))
-			{
-				$this->failed = $this->failed + 1;
-				$result['result'] = 'Error';
-				$xhtml .= "<a class='failAnchor' name='fail$this->failed'><div class='fail'>".$result['result']."</div>";
-				$result['message'] = (string)$testcase->{'error'};
-				$xhtml .= "<div class='errorMessage'>".nl2br($result['message'])."</div></a>";
-			}
-			else
-			{
-				$result['result'] = 'Pass';
-				$xhtml .= "<div class='pass'>".$result['result']."</div>";
-				$result['message'] = '';
-			}
-			$xhtml .= "</div>";
-			$test_results[] = $result;
-		}
-
-		return $xhtml;
+		$thereAreFailedTests = ($this->failed > 0);
+		$class = $thereAreFailedTests ? "epicfail" : "win";
+		$animatedGifHTML = "<div id=\"animatedgif\" class=\"$class\"></div>";
+		
+		$totalAssertionsHTML = "<p class=\"totalAssertions\"><span class=\"totalLabel\">Total assertions:</span> <span class=\"totalValue\">" . $this->assertions . "</span></p>";
+		
+		$totalFailedHTML = "<p class=\"totalAssertions\"><span class=\"totalLabel\">Total failed:</span> <span class=\"totalValue\">" . $this->failed . "</span></p>";
+		
+		$resultHTML = $animatedGifHTML . $totalAssertionsHTML . $totalFailedHTML . $testSuitesHTML;
+		
+		return $resultHTML;
 	}
 
+	private function getTestSuiteHTML($testSuite)
+	{
+		$testCasesHTML = "";
+		
+		foreach($testSuite->testcase as $testCase)
+		{
+			$testCasesHTML .= $this->getTestCaseHTML($testCase);
+		}
+		
+		$testSuiteLabel = "<h1 class=\"testSuiteLabel\">" . (string)$testSuite['name'] . "</h1>";
+		
+		$testSuiteHTML = $testSuiteLabel . $testCasesHTML;
+		
+		return $testSuiteHTML;
+	}
+	
+	private function getTestCaseHTML($testCase)
+	{
+		$name		= (string)$testCase['name'];
+		$assertions	= (string)$testCase['assertions'];
+		$time		= (string)$testCase['time'];
+		
+		$isFailure	= (isset($testCase->{'failure'}));
+		$isError	= (isset($testCase->{'error'}));
+		
+		$statusBoxCSS	= "pass";
+		$statusBoxText	= "Pass";
+		$messageBoxHTML	= "";
+		
+		if($isFailure)
+		{
+			$statusBoxCSS	= "fail";
+			$statusBoxText	= "Fail";
+			$message		= nl2br(htmlentities((string)$testCase->{'failure'}));
+			
+			$messageBoxHTML	= "<p class=\"messageBox\">$message</p>";
+			
+			$this->failed++;
+		}
+		else if ($isError)
+		{
+			$statusBoxCSS	= "fail";
+			$statusBoxText	= "Error";
+			$message		= nl2br(htmlentities((string)$testCase	->{'error'}));
+
+			$messageBoxHTML	= "<p class=\"messageBox\">$message</p>";
+			
+			$this->failed++;
+		}
+		
+		$this->assertions += $assertions;
+		
+		$nameHTML				= "<span class=\"testName\">$name</span>";
+		$assertionsAndTimeHTML	= "<span class=\"assertionsAndTime\">($assertions assertions - $time)</span>";
+		$statusBoxHTML			= "<span class=\"statusBox $statusBoxCSS\">$statusBoxText</span>";
+		
+		$testCaseHeader = "<p class=\"testCaseHeader\">" . $nameHTML . $assertionsAndTimeHTML . $statusBoxHTML . "</p>";
+		
+		
+		$testCaseHTML = 
+			"<div class=\"testCase\">" .
+			$testCaseHeader . 
+			$messageBoxHTML .
+			"</div>";
+		
+		return $testCaseHTML;
+	}
+	
 	public function addTestSuite($test)
 	{
 		$this->testSuites[] = $test;
 	}
-
-	public function getSuites($checked, $path = self::TESTS_FOLDER)
+	
+	public function addTestFolder($testFolder)
 	{
-		$result = "";
+	    require_once("$testFolder/suite.php");
+	}
+	
+	public function addTestFolders($testFolders)
+	{
+		foreach($testFolders as $testFolderName)
+		{
+			$this->addTestFolder($testFolderName);
+		}
+	}
+
+	public function getSuitesListHTML($checkedTests, $path = self::TESTS_FOLDER)
+	{
+		$listItemsHTML = "";
+		
 		$folders = glob($path);
-		$result .= "<ul>\n";
 		foreach($folders as $oneFolder)
 		{
 			if(is_dir($oneFolder))
 			{
-				$pathToTest = str_replace("./", "", $oneFolder);
 				$testName = basename($oneFolder);
-				$selectorSplit = explode("/", $pathToTest);
-				$selector = "";
-				foreach($selectorSplit as $word)
+				
+				$isTestFolder = (file_exists("$oneFolder/suite.php"));
+				if($isTestFolder)
 				{
-					$selector .= " ".$word;
+					$testIsChecked = (key_exists($oneFolder, $checkedTests));
+					$checkedBox = $testIsChecked ? "checked" : "";
+					
+					$listItem = "<li class='test'><input type='checkbox' name='$oneFolder' $checkedBox>$testName<a href='#' class='run'>Run</a></input>\n";
+					
+					$listItemsHTML .= $listItem;
 				}
-
-				$hasTestSuite = (file_exists($oneFolder."/suite.php"));
-				if($hasTestSuite)
-				{
-					$checkedBox = "";
-					if(key_exists($pathToTest, $checked))
-					{
-						$checkedBox = "checked";
-					}
-					$result .= "<li class='test'><input class='checkbox".$selector."' type='checkbox' name='$pathToTest' ".$checkedBox.">".$testName."<a href='#' class='run'>Run</a></input>\n";
-				}
-				$files = glob($oneFolder."/*");
+				
+				$files = glob("$oneFolder/*");
 				foreach($files as $oneFile)
 				{
 					if(is_dir($oneFile))
 					{
-						$result .= $this->getSuites($checked, $oneFile);
+						$innerSuitesList = $this->getSuitesListHTML($checkedTests, $oneFile);
+						
+						$listItemsHTML .= $innerSuitesList;
 					}
 				}
 			}
 		}
-		$result .= "</ul>\n";
+		
+		$suitesListHTML = "<ul class=\"suitesList\">$listItemsHTML</ul>\n";
 
-		return $result;
+		return $suitesListHTML;
 	}
 }
 ?>
