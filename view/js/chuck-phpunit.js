@@ -1,18 +1,23 @@
 document.addEvent("domready", function() {
 	var form = $("suitesForm");
 
-	var checkboxes = $$(".checkbox");
+	var checkboxes = $$(".suitesList input[type=checkbox]");
 	checkboxes.each(function(checkbox) {
-		checkbox.addEvent("click", function() {
-			var selector = checkbox.get("class");
-			selector = "." + selector.replace("checkbox ", "");
-			var checked = checkbox.get("checked");
-			var children = $$(selector);
-			children.each(function(child) {
-				child.set("checked", checked);
-			});
+		checkbox.addEvent("click", function(event) {
+			checkChildren(event.target);			
 		});
 	});
+	
+	var checkChildren = function(parentCheckbox){
+		var checked = parentCheckbox.get("checked");
+		
+		var parentList = parentCheckbox.getParent();
+		var childrenCheckboxes = parentList.getElements("input[type=checkbox]");
+		
+		childrenCheckboxes.each(function(child) {
+			child.set("checked", checked);
+		});
+	}
 
 	var checkAllButton = $("checkAll");
 	checkAllButton.addEvent("click", function(e) {
@@ -20,7 +25,7 @@ document.addEvent("domready", function() {
 		checkAll();
 	});
 
-	function checkAll() {
+	var checkAll = function() {
 		checkboxes.each(function(checkbox) {
 			checkbox.set("checked", "checked");
 		});
@@ -32,7 +37,7 @@ document.addEvent("domready", function() {
 		checkNone();
 	});
 
-	function checkNone() {
+	var checkNone = function() {
 		checkboxes.each(function(checkbox) {
 			checkbox.set("checked", "");
 		});
@@ -65,21 +70,26 @@ document.addEvent("domready", function() {
 
 	var runButtons = $$(".run");
 	runButtons.each(function(runButton) {
-		runButton.addEvent("click", function(e) {
-			e.preventDefault();
-			checkNone();
-			var parent = runButton.getParent();
-			var checkbox = parent.getChildren(".checkbox");
-			checkbox.set("checked", "checked");
-			sendForm();
+		runButton.addEvent("click", function(event) {
+			event.preventDefault();
+			
+			runButtonTest(event.target);
 		});
 	});
+	
+	var runButtonTest = function(button){
+		checkNone();
+		
+		var parent = button.getParent();
+		var checkbox = parent.getChildren("input[type=checkbox]");
+		checkbox.set("checked", "checked");
+		
+		sendForm();
+	}
 
-	function sendForm() {
+	var sendForm = function() {
+		$("results").set("html", "<div id='testloader'><h1>Running tests...</h1></div>");
 		form.submit();
-		$("navigationButtons").setStyle("display", "none");
-		$("results").set("html",
-				"<div id='testloader'><h1>Running tests...</h1></div>");
 	}
 
 	var animatedGif = $("animatedgif");
