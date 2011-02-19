@@ -162,6 +162,6 @@ body {
     left: 50%;
     background-image: url("img/testloader.gif");
     background-position: bottom;
-    background-repeat: none;
+    background-repeat: no-repeat;
     padding-bottom: 30px;
 }
