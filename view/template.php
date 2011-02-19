@@ -7,24 +7,22 @@
 		<link type="text/css" rel="stylesheet" href="view/css/chuck-phpunit.css" />
 	</head>
 	<body>
-		<div id="suites">
-			<div id="suitesButtons">
-				<a href="#" id="checkAll">Check all</a>
-				<a href="#" id="checkNone">Check none</a>
-			</div>
+		<div id="content">
 			<form name="suitesForm" id="suitesForm" action="" method="post">
-				<div id="suitesList">
-					<?=$suites?>
+				<div id="suitesButtons">
+					<a href="#" id="checkAll">Check all</a>
+					<a href="#" id="checkNone">Check none</a>
+				</div>
+				<div id="suitesListsContainer">
+					<?=$suitesListHTML?>
+				</div>
+				<div id="formButtons">
+					<a href="#" id="runAll">Run all</a>
+					<a href="#"	id="runSelected">Run selected</a>
 				</div>
 			</form>
-			<div id="formButtons">
-				<a href="#" id="runAll">Run all</a>
-				<a href="#"	id="runSelected">Run selected</a>
-			</div>
-		</div>
-		<div id="content">
 			<div id="results">
-				<?=$results?>
+				<?=$resultsHTML?>
 			</div>
 		</div>
 	</body>

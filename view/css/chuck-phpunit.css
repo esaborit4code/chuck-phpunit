@@ -1,4 +1,3 @@
-
 html * {
     padding: 0;
     margin: 0;
@@ -7,67 +6,141 @@ html * {
 }
 
 body {
-    background: #39424d;
+    background: #222222;
     font-size: 76%;
-    font-family: Arial, Verdana;
+    font-family: monospace;
     color: #eee;
 }
 
 #content {
-    width: 800px;
-    height: 100%;
-    margin: 30px 0 40px 400px;
+    margin: 30px 0 0 320px;
+}
+
+#suitesForm {
+    position: fixed;
+    top: 30px;
+    left: 0px;
+    width: 250px;
+    height: 70%;
+    background: #333333;
+	border: solid 5px;
+    border-top-color: #CCC;
+    border-left-color: #CCC;
+    border-right-color: #777;
+    border-bottom-color: #777;
+    border-left: 0;
+    padding: 20px;
+}
+
+#suitesListsContainer {
+    height: 70%;
+    overflow: auto;
+    margin: 40px 0 0 -20px;
+}
+
+.suitesList li {
+    position: relative;
+    margin-left: 20px;
+    list-style: none;
+    font-size: 11px;
+}
+
+.suitesList input {
+    margin-right: 7px;
+}
+
+.suitesList li a {
+    margin-left: 7px;
+    color: #e5c53c;
+}
+
+#suitesButtons {
+    position: absolute;
+    top: 20px;
+}
+
+#formButtons {
+    position: absolute;
+    bottom: 20px;
+}
+
+#suitesButtons a,
+#formButtons a {
+    text-decoration: none;
+    background: #555;
+	border: solid 3px;
+    border-top-color: #CCC;
+    border-left-color: #CCC;
+    border-right-color: #777;
+    border-bottom-color: #777;
+    color: #8FB732;
+    padding: 5px;
+    margin-right: 15px;
+    font-size: 13px;
 }
 
 #animatedgif {
     cursor: crosshair;
-    position: absolute;
-    top: 25px;
+    top: 30px;
     right: 5px;
     position: fixed;
-    float: right;
     background-repeat: no-repeat;
-    background-position: center center;
-}
-
-.epicfail {
-    background-image: url("img/fail.gif");
     width: 220px;
     height: 250px;
-    border: 2px solid red;
+    border-width: 2px;
+    border-style: solid;
+}
+
+#animatedgif.epicfail {
+    border-color: red;
+    background-image: url("img/fail.gif");
+    background-position: center center;
     background-color: black;
 }
 
-.win {
-    border: 2px solid green;
+#animatedgif.win {
+    border-color: green;
     background-image: url("img/win.gif");
-    width: 220px;
-    height: 250px;
     background-position: -60px 0px;
 }
 
-#content #results {
-    width: 100%;
-    margin-top: 30px;
+#results {
+    width: 800px;
 }
 
-#content #results .name {
-    width: 800px;
-    float: left;
-    background: #333;
+#results .testSuiteLabel {
+    background: #333333;
     padding: 5px;
     font-size: 14px;
-    position: relative;
-    border-bottom: 1px solid #666;
+    margin-top: 5px;
 }
 
-#content #results .pass, #content #results .fail {
-    width: 15%;
-    padding: 5px;
+#results .testCase {
+    margin-top: 1px;
+    background: #444444;
+}
+
+#results .testCaseHeader {
+    padding-left: 10px;
+    height: 17px;
+    font-size: 11px;
+}
+
+#results .testName {
+    font-weight: bold;
+}
+
+#results .assertionsAndTime {
+    font-size: 10px;
+    margin-left: 10px;
+}
+
+#results .statusBox {
+    margin: 0;
+    height: inherit;
+    width: 100px;
     text-align: center;
-    position: absolute;
-    right: 0;
-    top: 0;
+    float: right;
 }
 
 .pass {
@@ -78,95 +151,16 @@ body {
     background: red;
 }
 
-.errorMessage {
-    width: 770px;
-    background: #333;
-    float: left;
-    clear: both;
-    padding: 10px 5px 5px 20px;
-    font-size: .8em;
-}
-
-#content h1 {
-    font-size: 1.4em;
-}
-
-#suites {
-    position: fixed;
-    width: 300px;
-    background: #49525D;
-    border: solid 3px #29323D;;
-    border-left: 0;
-    padding: 20px;
-    float: left;
-}
-
-#suitesList {
-    height: 600px;
-    overflow: auto;
-}
-
-#suites li {
-    position: relative;
-    margin-left: 20px;
-    list-style: none;
-}
-
-#suites input {
-    margin-right: 7px;
-}
-
-#suites li a {
-    margin-left: 7px;
-    color: #e5c53c;
-}
-
-#suitesButtons {
-    margin-bottom: 20px;
-}
-
-#formButtons {
-    margin-top: 20px;
-}
-
-#suitesButtons a, #formButtons a {
-    text-decoration: none;
-    padding: 5px;
-    background: #69727D;
-    border-top: solid 2px #89929D;
-    border-left: solid 2px #89929D;
-    color: #8FB732;
-    margin-right: 15px;
-    font-size: 15px;
-}
-
-#navigationButtons {
-    display: none;
-    margin-top: 20px;
-    background: green;
-    text-align: center;
-}
-
-#navigationButtons span {
-    font-size: 20px;
-    margin-right: 10px;
-}
-
-#navigationButtons span .noclickable {
-    cursor: default;
-    font-weight: normal;
-}
-
-#navigationButtons span .clickable {
-    cursor: pointer;
-    font-weight: bold;
+.messageBox {
+    background: #555555;
+    padding: 5px 20px 5px 20px;
 }
 
 #testloader {
     position: absolute;
     top: 50%;
     left: 50%;
-    background-image: url("view/img/testloader.gif");
+    background-image: url("img/testloader.gif");
     background-position: bottom;
     background-repeat: none;
     padding-bottom: 30px;
